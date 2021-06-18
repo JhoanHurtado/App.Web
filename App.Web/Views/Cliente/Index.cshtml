@@ -1,0 +1,216 @@
+﻿@model App.Web.Models.Cliente
+
+@{
+    ViewBag.Title = "Clientes";
+}
+
+<h2>Clientes</h2>
+
+<p>
+    @*@Html.ActionLink("Get Clientes", null, null,null,new { id = "getClients" })*@
+    <input type="button" value="Get Clientes" id="getClients" />
+    <input type="button" value="Nuevo Cliente" id="newClient" />
+</p>
+<div id="form">
+
+    <div id="FormCreate">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                <h4>Cliente nuevo</h4>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Identificador, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Identificador, new { htmlAttributes = new { @class = "form-control", id = "identificador" } })
+                        @Html.ValidationMessageFor(model => model.Identificador, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.NombreCompleto, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.NombreCompleto, new { htmlAttributes = new { @class = "form-control", id = "nombreCompleto" } })
+                        @Html.ValidationMessageFor(model => model.NombreCompleto, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="button" value="Crear" class="btn btn-default" id="sendClientCreate" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="FormUpdate" style="display:none">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-horizontal">
+                <h4>Modificar Cliente</h4>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Identificador, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Identificador, new { htmlAttributes = new { @class = "form-control", id = "identificadorUp" } })
+                        @Html.ValidationMessageFor(model => model.Identificador, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.NombreCompleto, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.NombreCompleto, new { htmlAttributes = new { @class = "form-control", id = "nombreCompletoUp" } })
+                        @Html.ValidationMessageFor(model => model.NombreCompleto, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <input type="button" value="Acualizar" class="btn btn-default" id="sendClientUpdate" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="ClientList">
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Identificador)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreCompleto)
+            </th>
+            <th></th>
+        </tr>
+
+    <tbody id="tbody">
+        @foreach (var item in (List<App.Web.Models.Cliente>)ViewBag.Clientes) {
+    <tr>
+                <td>
+            @Html.DisplayFor(modelItem => item.Identificador)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.NombreCompleto)
+        </td>
+        <td>
+            <a href="javascript:void(0)" data-id="@item.Identificador" data-nombre="@item.NombreCompleto" class="editUser">Editar</a> |
+            <a href="javascript:void(0)" data-id="@item.Identificador " class="deleteUser">Eliminar</a>
+        </td>
+    </tr>
+}
+    </tbody>
+
+</table>
+</div>
+
+@section scripts{
+    <script>
+        $(function () {
+            $("#getClients").click(function () {
+                var url = "@Url.Action("GetClients", "Cliente")";
+
+                    $.ajax({
+                      url: url,
+                      method: 'GET'    
+                    }).then(function(data) {
+                        var row = "";
+                            $("#tbody").empty();
+                        var clientes = JSON.parse(data);
+                          $.each(clientes, function(i, item) {
+                            row += '<tr><td>'+item.identificador+'</td><td>'+item.nombreCompleto+'</td><td><a href="javascript:void(0)" data-id="'+item.identificador+'" data-nombre="'+item.nombreCompleto+'" class="editUser">Editar</a> | <a href="javascript:void(0)" data-id="'+item.identificador+'" class="deleteUser">Eliminar</a></td></tr>';
+                          });
+                        $("#tbody").html(row);
+                    });
+            });
+
+            $("#newClient").click(function () {
+                var url = "@Url.Action("Create", "Cliente")";
+                $.get(url).done(function (data) {
+                        var row = "";
+                            $("#tbody").empty();
+                        var clientes = JSON.parse(data);
+                          $.each(clientes, function(i, item) {
+                            row += '<tr><td>'+item.identificador+'</td><td>'+item.nombreCompleto+'</td><td><a href="javascript:void(0)" data-id="'+item.identificador+'" data-nombre="'+item.nombreCompleto+'" class="editUser">Editar</a> | <a href="javascript:void(0)" data-id="'+item.identificador+'" class="deleteUser">Eliminar</a></td></tr>';
+                          });
+                        $("#tbody").html(row);
+                }).fail();
+            });
+
+            $("#sendClientCreate").click(function () {
+                var identificador = $("#identificador").val();
+                var nombreCompleto = $("#nombreCompleto").val();
+                var ClienteData = { Identificador : identificador, NombreCompleto : nombreCompleto };
+                var url = "@Url.Action("Create", "Cliente")";
+                var tablaContent = "";
+                $.post(url, ClienteData).done(function (data) {
+                        var row = "";
+                            $("#tbody").empty();
+                        var clientes = JSON.parse(data);
+                          $.each(clientes, function(i, item) {
+                            row += '<tr><td>'+item.identificador+'</td><td>'+item.nombreCompleto+'</td><td><a href="javascript:void(0)" data-id="'+item.identificador+'" data-nombre="'+item.nombreCompleto+'" class="editUser">Editar</a> | <a href="javascript:void(0)" data-id="'+item.identificador+'" class="deleteUser">Eliminar</a></td></tr>';
+                          });
+                        $("#tbody").html(row);
+                }).fail();
+            });
+
+
+            $(".editUser").click(function () {
+                var identificador = $("#identificadorUp");
+                var nombreCompleto = $("#nombreCompletoUp");
+                identificador.val($(this).data('id'));
+                nombreCompleto.val($(this).data('nombre'));
+                $("#FormCreate").hide();
+                $("#FormUpdate").show();
+            });
+
+            $("#sendClientUpdate").click(function () {
+                var identificador = $("#identificadorUp");
+                var nombreCompleto = $("#nombreCompletoUp");
+                var ClienteData = { Identificador: identificador.val(), NombreCompleto: nombreCompleto.val() };
+                var url = "@Url.Action("Edit", "Cliente")";
+                $.post(url, ClienteData).done(function (data) {
+                    var dat = JSON.parse(data);
+                    identificador.val();
+                    nombreCompleto.val();
+                    $("#FormCreate").show();
+                    $("#FormUpdate").hide();
+                        var row = "";
+                            $("#tbody").empty();
+                        var clientes = JSON.parse(data);
+                          $.each(clientes, function(i, item) {
+                            row += '<tr><td>'+item.identificador+'</td><td>'+item.nombreCompleto+'</td><td><a href="javascript:void(0)" data-id="'+item.identificador+'" data-nombre="'+item.nombreCompleto+'" class="editUser">Editar</a> | <a href="javascript:void(0)" data-id="'+item.identificador+'" class="deleteUser">Eliminar</a></td></tr>';
+                          });
+                        $("#tbody").html(row);
+                }).fail();
+            });
+
+            $(".deleteUser").click(function () {
+                var ClienteData = { id: $(this).data('id') };
+                var url = "@Url.Action("Delete", "Cliente")";
+                $.post(url, ClienteData).done(function (data) {
+                    $("#FormCreate").show();
+                    $("#FormUpdate").hide();
+                                var row = "";
+                            $("#tbody").empty();
+                        var clientes = JSON.parse(data);
+                          $.each(clientes, function(i, item) {
+                            row += '<tr><td>'+item.identificador+'</td><td>'+item.nombreCompleto+'</td><td><a href="javascript:void(0)" data-id="'+item.identificador+'" data-nombre="'+item.nombreCompleto+'" class="editUser">Editar</a> | <a href="javascript:void(0)" data-id="'+item.identificador+'" class="deleteUser">Eliminar</a></td></tr>';
+                          });
+                        $("#tbody").html(row);
+                }).fail();
+            });
+
+        });
+    </script>
+    }
